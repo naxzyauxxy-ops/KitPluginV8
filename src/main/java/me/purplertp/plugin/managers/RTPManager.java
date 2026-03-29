@@ -107,24 +107,22 @@ public class RTPManager {
     }
 
     /**
-     * Fire-and-forget async chunk preload around a destination.
-     * Runs in background — countdown proceeds in parallel.
-     * Since the world is pre-generated these load near-instantly anyway.
+     * Fire-and-forget chunk preload using Paper's native async chunk API.
+     * This is non-blocking and uses Paper's own chunk loading pipeline —
+     * way faster than the blocking chunk.load() approach.
+     * Loads a 5x5 grid around the destination for zero pop-in.
      */
     private void preloadChunksAsync(Location dest) {
         int cx = dest.getBlockX() >> 4;
         int cz = dest.getBlockZ() >> 4;
         World w = dest.getWorld();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            for (int ox = -1; ox <= 1; ox++) {
-                for (int oz = -1; oz <= 1; oz++) {
-                    try {
-                        Chunk chunk = w.getChunkAt(cx + ox, cz + oz);
-                        if (!chunk.isLoaded()) chunk.load();
-                    } catch (Exception ignored) {}
-                }
+
+        // Use Paper's async chunk API — non-blocking, runs on Paper's chunk thread pool
+        for (int ox = -2; ox <= 2; ox++) {
+            for (int oz = -2; oz <= 2; oz++) {
+                w.getChunkAtAsync(cx + ox, cz + oz);
             }
-        });
+        }
     }
 
     /**
@@ -190,8 +188,7 @@ public class RTPManager {
             int x = centerX + ox;
             int z = centerZ + oz;
             try {
-                Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
-                if (!chunk.isLoaded()) chunk.load();
+                Chunk chunk = world.getChunkAtAsync(x >> 4, z >> 4).get();
 
                 Location loc = null;
                 if (world.getEnvironment() == World.Environment.NETHER) {

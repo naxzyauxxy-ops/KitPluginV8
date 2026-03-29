@@ -94,13 +94,14 @@ public class LocationPoolManager {
             int z = centerZ + offsetZ;
 
             try {
-                Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
-                if (!chunk.isLoaded()) chunk.load();
+                // Use Paper's async chunk future — blocks only until this one chunk is ready
+                // which is fast since the world is pre-generated (data already on disk)
+                Chunk chunk = world.getChunkAtAsync(x >> 4, z >> 4).get();
 
                 Location loc = getSafeY(world, x, z, rng);
                 if (loc != null) return loc;
             } catch (Exception e) {
-                plugin.getLogger().log(Level.FINE, "Pool: chunk load failed at " + x + "," + z, e);
+                plugin.getLogger().log(Level.FINE, "Pool: chunk failed at " + x + "," + z, e);
             }
         }
         return null;
