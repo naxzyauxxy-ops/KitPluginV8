@@ -116,11 +116,14 @@ public class RTPManager {
         int cx = dest.getBlockX() >> 4;
         int cz = dest.getBlockZ() >> 4;
         World w = dest.getWorld();
+
+        // Fire ALL chunk requests simultaneously — your CPU can handle it
+        // 9x9 grid for overworld, 7x7 for nether/end
         int radius = w.getEnvironment() == World.Environment.NORMAL ? 4 : 3;
 
         for (int ox = -radius; ox <= radius; ox++) {
             for (int oz = -radius; oz <= radius; oz++) {
-                w.getChunkAtAsync(cx + ox, cz + oz);
+                w.getChunkAtAsync(cx + ox, cz + oz, true);
             }
         }
     }
@@ -165,8 +168,34 @@ public class RTPManager {
                 } else {
                     inRtp.remove(player.getUniqueId());
                     cancel();
+
+                    // Apply blindness so the player doesn't see chunk loading
+                    player.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                            org.bukkit.potion.PotionEffectType.BLINDNESS, 60, 1, false, false, false));
+
                     player.teleport(dest);
                     player.playSound(dest, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.6f, 1.2f);
+
+                    // Preload chunks around dest, then remove blindness once they're ready
+                    int cx = dest.getBlockX() >> 4;
+                    int cz = dest.getBlockZ() >> 4;
+                    World w = dest.getWorld();
+                    int radius = w.getEnvironment() == World.Environment.NORMAL ? 4 : 3;
+
+                    java.util.List<java.util.concurrent.CompletableFuture<Chunk>> futures = new java.util.ArrayList<>();
+                    for (int ox = -radius; ox <= radius; ox++) {
+                        for (int oz = -radius; oz <= radius; oz++) {
+                            futures.add(w.getChunkAtAsync(cx + ox, cz + oz));
+                        }
+                    }
+
+                    java.util.concurrent.CompletableFuture.allOf(futures.toArray(new java.util.concurrent.CompletableFuture[0]))
+                        .thenRun(() -> Bukkit.getScheduler().runTask(plugin, () -> {
+                            if (player.isOnline()) {
+                                player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                            }
+                        }));
+
                     if (cooldown > 0) {
                         plugin.getCooldownManager().setCooldown(player.getUniqueId(), worldName, cooldown);
                     }
