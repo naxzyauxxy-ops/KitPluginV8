@@ -116,20 +116,11 @@ public class RTPManager {
         int cx = dest.getBlockX() >> 4;
         int cz = dest.getBlockZ() >> 4;
         World w = dest.getWorld();
-
-        // Overworld needs a bigger preload radius due to surface complexity
         int radius = w.getEnvironment() == World.Environment.NORMAL ? 4 : 3;
 
         for (int ox = -radius; ox <= radius; ox++) {
             for (int oz = -radius; oz <= radius; oz++) {
-                final int fx = cx + ox;
-                final int fz = cz + oz;
-                w.getChunkAtAsync(fx, fz).thenAccept(chunk -> {
-                    // Force-send the chunk to the player's client as soon as it's loaded
-                    if (player.isOnline()) {
-                        player.sendChunk(chunk);
-                    }
-                });
+                w.getChunkAtAsync(cx + ox, cz + oz);
             }
         }
     }
