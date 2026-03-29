@@ -72,7 +72,7 @@ public class RTPManager {
         if (poolLoc != null) {
             // Got a location instantly from pool —
             // start countdown immediately AND preload chunks in background at the same time
-            preloadChunksAsync(poolLoc);
+            preloadChunksAsync(player, poolLoc);
             runCountdown(player, poolLoc, worldName, cooldown, countdown);
         } else {
             // Pool empty — search async, then start countdown
@@ -99,7 +99,7 @@ public class RTPManager {
                                 .replace("{attempts}", String.valueOf(maxAttempts)));
                         return;
                     }
-                    preloadChunksAsync(found);
+                    preloadChunksAsync(player, found);
                     runCountdown(player, found, worldName, cooldown, countdown);
                 });
             });
@@ -108,19 +108,28 @@ public class RTPManager {
 
     /**
      * Fire-and-forget chunk preload using Paper's native async chunk API.
-     * This is non-blocking and uses Paper's own chunk loading pipeline —
-     * way faster than the blocking chunk.load() approach.
-     * Loads a 5x5 grid around the destination for zero pop-in.
+     * After loading, force-sends chunks to the player's client so there's
+     * no waiting when they arrive. Overworld gets a bigger radius since
+     * overworld chunks take longer to render client-side.
      */
-    private void preloadChunksAsync(Location dest) {
+    private void preloadChunksAsync(Player player, Location dest) {
         int cx = dest.getBlockX() >> 4;
         int cz = dest.getBlockZ() >> 4;
         World w = dest.getWorld();
 
-        // Use Paper's async chunk API — non-blocking, runs on Paper's chunk thread pool
-        for (int ox = -2; ox <= 2; ox++) {
-            for (int oz = -2; oz <= 2; oz++) {
-                w.getChunkAtAsync(cx + ox, cz + oz);
+        // Overworld needs a bigger preload radius due to surface complexity
+        int radius = w.getEnvironment() == World.Environment.NORMAL ? 4 : 3;
+
+        for (int ox = -radius; ox <= radius; ox++) {
+            for (int oz = -radius; oz <= radius; oz++) {
+                final int fx = cx + ox;
+                final int fz = cz + oz;
+                w.getChunkAtAsync(fx, fz).thenAccept(chunk -> {
+                    // Force-send the chunk to the player's client as soon as it's loaded
+                    if (player.isOnline()) {
+                        player.sendChunk(chunk);
+                    }
+                });
             }
         }
     }
