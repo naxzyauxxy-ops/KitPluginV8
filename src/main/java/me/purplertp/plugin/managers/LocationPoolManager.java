@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
