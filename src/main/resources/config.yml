@@ -1,0 +1,97 @@
+
+ENABLED: true
+SETTINGS:
+  PLAYERS-IN-RTP: 150
+  MAX-ATTEMPTS: 25
+  COUNTDOWN: 5
+
+  # --- Location Pool Settings ---
+  # How many safe locations to pre-generate per world and keep ready.
+  # When a player RTP's, a location is instantly pulled from the pool.
+  # The pool refills in the background on your powerful CPU.
+  POOL-SIZE: 20
+
+  # How often (in ticks) to attempt refilling the pool. 20 ticks = 1 second.
+  # Lower = faster refill. With a pre-generated world and powerful CPU, 1-2s is fine.
+  POOL-REFILL-INTERVAL: 40
+
+  # How many locations to try generating per refill tick (runs async).
+  # Higher = pool fills faster but uses more CPU per tick.
+  POOL-FILL-BATCH: 5
+
+MESSAGES:
+  DISABLED: "&cRTP is currently disabled."
+  COOLDOWN: "&cYou can't rtp for another {remaining}s."
+  MAX-PLAYERS: "&cToo many players are using RTP right now. Please try again later."
+  WORLD-NOT-EXIST: "&cThe world does not exist."
+  SEARCHING: "&dSearching for a safe location..."
+  SAFE-LOCATION-FOUND: ""
+  MAX-ATTEMPTS: "&cCould not find a safe location after {attempts} attempts."
+  DESTINATION-DISABLED: "&cThis RTP destination is currently disabled."
+  UNSAFE-LOCATION: "&cThe location is unsafe"
+  POOL-WARMING: "&eRTP pool is warming up, please try again in a moment."
+
+DENIED-WORLDS:
+  - afk
+
+WORLD-SETTINGS:
+  world:
+    MAX-RADIUS: 20000
+    MIN-RADIUS: 10000
+    CENTER-X: 0
+    CENTER-Z: 0
+    COOLDOWN: 0
+  world_nether:
+    MAX-RADIUS: 7500
+    MIN-RADIUS: 5000
+    CENTER-X: 0
+    CENTER-Z: 0
+    COOLDOWN: 0
+  world_the_end:
+    MAX-RADIUS: 10000
+    MIN-RADIUS: 7000
+    CENTER-X: 0
+    CENTER-Z: 0
+    COOLDOWN: 0
+
+RTP-MENU:
+  TITLE: "&8ʀᴀɴᴅᴏᴍ ᴛᴇʟᴇᴘᴏʀᴛ"
+  SIZE: 27
+  PLACEHOLDER: true
+  BUTTONS:
+    OVERWORLD:
+      DISPLAY-NAME: "&#0bee88ᴏᴠᴇʀᴡᴏʀʟᴅ"
+      MATERIAL: "GRASS_BLOCK"
+      SLOT: 11
+      WORLD: "world"
+      ENABLED: true
+      LORE:
+        - "&fClick to randomly teleport"
+        - ""
+        - "&7Players: &b{players}"
+        - "&7Ping: &b{ping}ms"
+        - "&7Pool: &b{pool} &7ready"
+    NETHER:
+      DISPLAY-NAME: "&#0bee88ɴᴇᴛʜᴇʀ"
+      MATERIAL: "NETHERRACK"
+      SLOT: 13
+      WORLD: "world_nether"
+      ENABLED: true
+      LORE:
+        - "&fClick to randomly teleport"
+        - ""
+        - "&7Players: &b{players}"
+        - "&7Ping: &b{ping}ms"
+        - "&7Pool: &b{pool} &7ready"
+    THE_END:
+      DISPLAY-NAME: "&#0bee88ᴇɴᴅ"
+      MATERIAL: "END_STONE"
+      SLOT: 15
+      WORLD: "world_the_end"
+      ENABLED: true
+      LORE:
+        - "&fClick to randomly teleport"
+        - ""
+        - "&7Players: &b{players}"
+        - "&7Ping: &b{ping}ms"
+        - "&7Pool: &b{pool} &7ready"

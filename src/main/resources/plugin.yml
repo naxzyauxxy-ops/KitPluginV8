@@ -1,0 +1,27 @@
+name: PurpleRTP
+version: 2.0.0
+main: me.purplertp.plugin.PurpleRTP
+api-version: 1.21
+author: PurpleRTP
+description: DonutSMP-style Random Teleport plugin with pre-generated location pool
+
+commands:
+  rtp:
+    description: Open the RTP menu
+    usage: /rtp
+    aliases: [wild, wilderness]
+  rtpadmin:
+    description: Admin commands for PurpleRTP
+    usage: /rtpadmin <reload|clearcooldown <player>|forcertp <player>|pool>
+    permission: purplertp.admin
+
+permissions:
+  purplertp.use:
+    description: Allows use of /rtp
+    default: true
+  purplertp.admin:
+    description: Allows admin commands
+    default: op
+  purplertp.bypass.cooldown:
+    description: Bypass RTP cooldown
+    default: op
